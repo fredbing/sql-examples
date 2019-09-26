@@ -1,1 +1,1 @@
-# sql-problems-solved
+# sql-examples
