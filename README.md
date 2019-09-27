@@ -1,1 +1,1 @@
-# sql-examples
+# sql-snippets
