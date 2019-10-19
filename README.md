@@ -1,2 +1,2 @@
 # sql-snippets
-These are SQL snippets for my reference
+These are SQL snippets for reference
