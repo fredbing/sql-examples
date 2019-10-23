@@ -28,6 +28,52 @@ alter table sales
 add partition (yr =2003)
 location '2003/';
 
+/* Hive on AWS EMR 
+*/
+-- Create external table in S3
+create external table ext_s3_tbl (
+    RowID smallint, 
+    OrderID int, 
+    OrderDate date, 
+    Quote float, 
+    Price double,
+    CustomerName string)
+PARTITION BY(yr int) 
+ROW FORMAT DILIMITED 
+FIELDS TERMINATED BY '|' STORED AS TEXTFILE
+LOCATION 's3://mybucket/region/';
+
+-- Create local table
+create table hive_tbl (
+    R_REGIONKEY INT, 
+    R_NAME STRING, 
+    R_COMMENT STRING)
+PARTITION BY(yr int) 
+ROW FORMAT DILIMITED 
+FIELDS TERMINATED BY '|' 
+LINES TERMINATED BY '\n';
+
+-- overwrite local table with external table
+insert overwrite table hive_tbl select * from ext_s3_tbl;
+
+-- Create external table in DynamoDB
+create external table ext_ddb_tbl (
+    R_REGIONKEY BIGINT, 
+    R_NAME STRING, 
+    R_COMMENT STRING)
+STORED BY 'org.apache.hadoop.hive.dynamodb.DynamoDBStorageHandler' 
+TBLPROPERTIES (
+    "dynamodb.table.name" = "ext_ddb_tbl",
+    "dynamodb.column.mapping" = "r_regionkey:RegionID, r_name:Name, r_comment:Comment"
+);
+
+-- Copy local hive table to DynamoDB
+insert overwrite table ext_ddb_tbl select r_regionkey, r_name, r_comment from hive_tbl;
+
+-- Run queries from DynamoDB from Hive
+select * from ext_ddb_tbl;
+
+
 
 /*
 Query tables
