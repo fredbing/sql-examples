@@ -24,7 +24,8 @@ from [dbo].[ACCOUNT]
 select name
 from ACCOUNT
 where BALANCE = (select max(BALANCE) 
-                 from [dbo].[ACCOUNT])
+                 from [dbo].[ACCOUNT]
+                )
 
 
 -- Who has the second highest balance?
@@ -44,7 +45,8 @@ select min(BALANCE)
 from ACCOUNT
 where BALANCE in (select distinct top 2 BALANCE 
                   from [dbo].[ACCOUNT]
-                  order by BALANCE desc)
+                  order by BALANCE desc
+                 )
 
 -- find out all the names of the persons that have the 2nd highest disctinct balance
 select name
@@ -77,6 +79,16 @@ evaluated once for each row processed by the outer query (and hence correlated s
 
 */
 
+-- A typical correlated query sample
+SELECT employee_id, name
+FROM employees employee_id
+WHERE salary > (
+                SELECT AVG(salary)
+                FROM employees
+                WHERE department = emp.department
+               )
+
+
 -- Question: Who have (has) the 2nd highest disctinct balance?
 select name
 from ACCOUNT 
@@ -93,11 +105,13 @@ SELECT ACID, NAME
 FROM ACCT_MASTER AS AM 
 WHERE EXISTS(SELECT *
              FROM TXN_MASTER AS TM
-             WHERE AM.ACID = TM.ACID)
+             WHERE AM.ACID = TM.ACID
+            )
 
 -- Question: list the ACID and the NAME where the account holder has done more than 3 transactions for the month of November 2011.
 SELECT ACID, NAME 
 FROM ACCT_MASTER AS AM 
 WHERE 3 = (SELECT COUNT(ACID)
              FROM TXN_MASTER AS TM
-             WHERE AM.ACID = TM.ACID)
+             WHERE AM.ACID = TM.ACID
+          )
